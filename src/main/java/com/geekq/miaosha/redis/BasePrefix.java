@@ -1,9 +1,12 @@
 package com.geekq.miaosha.redis;
 
+//前缀抽象类
 public abstract class BasePrefix implements  KeyPrefix {
 
+    //过期时间，0代表永不过期
     private int expireSeconds;
 
+    //前缀名称
     private String prefix ;
 
     public BasePrefix(int expireSeconds ,  String prefix ){
@@ -12,6 +15,7 @@ public abstract class BasePrefix implements  KeyPrefix {
         this.prefix = prefix;
     }
 
+    //永不过期的prefix
     public BasePrefix(String prefix) {
        this(0,prefix);
     }
@@ -23,7 +27,7 @@ public abstract class BasePrefix implements  KeyPrefix {
 
     /**
      * 可确定获取唯一key
-     * @return
+     * @return 类名+前缀
      */
     @Override
     public String getPrefix() {

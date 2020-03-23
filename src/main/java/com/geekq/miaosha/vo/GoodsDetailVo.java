@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
+//商品详情页的传值对象
 @Setter
 @Getter
 @AllArgsConstructor

@@ -18,6 +18,7 @@ import javax.validation.Valid;
 
 import static com.geekq.miaosha.common.Constanst.COUNTLOGIN;
 
+//登录控制器
 @Controller
 @RequestMapping("/login")
 public class LoginController {
@@ -26,6 +27,13 @@ public class LoginController {
 
     @Autowired
     private MiaoShaUserService userService;
+
+    /**
+     * 登录页面
+     * @param loginVo
+     * @param model
+     * @return
+     */
     @Reference
     @RequestMapping("/to_login")
     public String tologin(LoginVo loginVo, Model model) {
@@ -38,6 +46,12 @@ public class LoginController {
         return "login";
     }
 
+    /**
+     * 登录
+     * @param response
+     * @param loginVo
+     * @return
+     */
     @RequestMapping("/do_login")
     @ResponseBody
     public ResultGeekQ<Boolean> dologin(HttpServletResponse response, @Valid LoginVo loginVo) {
@@ -48,6 +62,12 @@ public class LoginController {
     }
 
 
+    /**
+     * 生成token的测试方法
+     * @param response
+     * @param loginVo
+     * @return
+     */
     @RequestMapping("/create_token")
     @ResponseBody
     public String createToken(HttpServletResponse response, @Valid LoginVo loginVo) {

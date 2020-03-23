@@ -18,6 +18,7 @@ public class LoginVo {
     @MobileCheck
     private String mobile ;
 
+    //不能为空，长度最小32
     @NotNull
     @Length(min=32)
     private String password;

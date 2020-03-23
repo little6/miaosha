@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.util.Date;
 
+//秒杀商品
 @Setter
 @Getter
 @AllArgsConstructor

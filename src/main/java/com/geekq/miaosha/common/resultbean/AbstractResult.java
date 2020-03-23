@@ -3,8 +3,11 @@ package com.geekq.miaosha.common.resultbean;
 import com.geekq.miaosha.common.enums.ResultStatus;
 
 public class AbstractResult {
+    //响应状态码和响应信息
     private ResultStatus status;
+    //响应码
     private int code;
+    //响应信息
     private String message;
 
     protected AbstractResult(ResultStatus status, String message) {

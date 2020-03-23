@@ -4,8 +4,10 @@ import com.geekq.miaosha.common.enums.ResultStatus;
 
 import java.io.Serializable;
 
+//接口返回结果封装类
 public class ResultGeekQ<T> extends AbstractResult implements Serializable {
     private static final long serialVersionUID = 867933019328199779L;
+    //响应数据
     private T data;
     private Integer count;
 

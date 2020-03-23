@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.util.Date;
 
+//商品信息+秒杀商品信息封装类
 @Setter
 @Getter
 @AllArgsConstructor

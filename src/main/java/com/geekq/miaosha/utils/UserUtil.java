@@ -18,8 +18,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.geekq.miaosha.domain.MiaoshaUser;
 
+/**
+ * 生成用户测试数据的工具类
+ */
 public class UserUtil {
-	
+
+	//创建用户信息，生成用户对应的token信息
 	private static void createUser(int count) throws Exception{
 		List<MiaoshaUser> users = new ArrayList<MiaoshaUser>(count);
 		//生成用户

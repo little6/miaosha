@@ -25,6 +25,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
+/**
+ * 商品controller
+ */
 @Controller
 @RequestMapping("/goods")
 public class GoodsController extends BaseController {
@@ -46,8 +49,10 @@ public class GoodsController extends BaseController {
     ApplicationContext applicationContext;
 
     /**
+     * 商品列表页(页面级别缓存)
      * QPS:1267 load:15 mysql
      * 5000 * 10
+     * 添加缓存后
      * QPS:2884, load:5
      * */
     @RequestMapping(value="/to_list", produces="text/html")
@@ -59,6 +64,15 @@ public class GoodsController extends BaseController {
         return render(request,response,model,"goods_list",GoodsKey.getGoodsList,"");
     }
 
+    /**
+     * 商品详情页(url级别缓存)
+     * @param request
+     * @param response
+     * @param model
+     * @param user
+     * @param goodsId
+     * @return
+     */
     @RequestMapping(value="/to_detail2/{goodsId}",produces="text/html")
     @ResponseBody
     public String detail2(HttpServletRequest request, HttpServletResponse response, Model model,MiaoshaUser user,
@@ -98,13 +112,15 @@ public class GoodsController extends BaseController {
                 request.getServletContext(),request.getLocale(), model.asMap(), applicationContext );
         html = viewResolver.getTemplateEngine().process("goods_detail", ctx);
         if(!StringUtils.isEmpty(html)) {
+            //手动渲染完，设置缓存
             redisService.set(GoodsKey.getGoodsDetail, ""+goodsId, html);
         }
         return html;
     }
 
     /**
-     * 数据库很少使用long的　，　id 正常使一般使用　snowflake 分布式自增id
+     * 商品详情页 (页面静态化，返回json)
+     * 数据库很少使用long的　，　id 使用　snowflake 分布式自增id
      * @param model
      * @param user
      * @param goodsId
@@ -115,6 +131,7 @@ public class GoodsController extends BaseController {
     public ResultGeekQ<GoodsDetailVo> detail(HttpServletRequest request, HttpServletResponse response, Model model,MiaoshaUser user,
                                         @PathVariable("goodsId")long goodsId) {
         ResultGeekQ<GoodsDetailVo> result = ResultGeekQ.build();
+        //根据id获取商品详细信息
         GoodsVo goods = goodsService.getGoodsVoByGoodsId(goodsId);
         long startAt = goods.getStartDate().getTime();
         long endAt = goods.getEndDate().getTime();
@@ -134,7 +151,9 @@ public class GoodsController extends BaseController {
         GoodsDetailVo vo = new GoodsDetailVo();
         vo.setGoods(goods);
         vo.setUser(user);
+        //剩余时间
         vo.setRemainSeconds(remainSeconds);
+        //秒杀状态
         vo.setMiaoshaStatus(miaoshaStatus);
         result.setData(vo);
         return result;

@@ -18,7 +18,7 @@ import java.io.OutputStream;
 public class BaseController {
 
 
-    //加一个配置项
+    //加一个配置项：是否开启页面缓存
     @Value("#{'${pageCache.enbale}'}")
     private boolean pageCacheEnable;
 
@@ -29,27 +29,41 @@ public class BaseController {
     RedisService redisService;
 
 
+    /**
+     * 手动渲染html，响应客户端，设置页面缓存
+     * @param request
+     * @param response
+     * @param model
+     * @param tplName
+     * @param prefix
+     * @param key
+     * @return
+     */
     public String render(HttpServletRequest request, HttpServletResponse response, Model model, String tplName, KeyPrefix prefix, String key) {
         if(!pageCacheEnable) {
             return tplName;
         }
-        //取缓存
+        //1、取缓存
         String html = redisService.get(prefix, key, String.class);
         if(!StringUtils.isEmpty(html)) {
             out(response, html);
             return null;
         }
-        //手动渲染
+        //2、没有缓存，手动渲染
         WebContext ctx = new WebContext(request,response,
                 request.getServletContext(),request.getLocale(), model.asMap());
         html = thymeleafViewResolver.getTemplateEngine().process(tplName, ctx);
         if(!StringUtils.isEmpty(html)) {
+            //3、手动设置缓存
             redisService.set(prefix, key, html);
         }
         out(response, html);
         return null;
     }
 
+    /**
+     * 输出响应html
+     */
     public static void out(HttpServletResponse res, String html){
         res.setContentType("text/html");
         res.setCharacterEncoding("UTF-8");

@@ -34,7 +34,14 @@ public class OrderController {
 	
 	@Autowired
 	GoodsService goodsService;
-	
+
+	/**
+	 * 订单详情信息(json数据)
+	 * @param model
+	 * @param user
+	 * @param orderId
+	 * @return
+	 */
     @RequestMapping("/detail")
     @ResponseBody
     public ResultGeekQ<OrderDetailVo> info(Model model, MiaoshaUser user,

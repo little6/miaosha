@@ -3,6 +3,7 @@ package com.geekq.miaosha.dao;
 import com.geekq.miaosha.domain.MiaoshaUser;
 import org.apache.ibatis.annotations.*;
 
+//秒杀用户dao
 @Mapper
 public interface MiaoShaUserDao {
 
@@ -13,6 +14,7 @@ public interface MiaoShaUserDao {
     public MiaoshaUser getById(@Param("id") long id ) ;
 
 
+    //修改密码
     @Update("update miaosha_user set password = #{password} where id = #{id}")
     public void update(MiaoshaUser toBeUpdate);
 

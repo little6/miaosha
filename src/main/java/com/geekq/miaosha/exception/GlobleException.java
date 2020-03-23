@@ -2,6 +2,7 @@ package com.geekq.miaosha.exception;
 
 import com.geekq.miaosha.common.enums.ResultStatus;
 
+//全局自定义异常
 public class GlobleException extends RuntimeException {
 
 

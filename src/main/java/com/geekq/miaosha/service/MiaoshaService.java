@@ -18,6 +18,9 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
+/**
+ * 秒杀服务
+ */
 @Service
 public class MiaoshaService {
 	
@@ -29,11 +32,18 @@ public class MiaoshaService {
 	@Autowired
 	RedisService redisService;
 
+	/**
+	 * 秒杀(添加事务)
+	 * @param user
+	 * @param goods
+	 * @return
+	 */
 	@Transactional
 	public OrderInfo miaosha(MiaoshaUser user, GoodsVo goods) {
 		//减库存 下订单 写入秒杀订单
 		boolean success = goodsService.reduceStock(goods);
 		if(success){
+			//减库存成功，生成订单
 			return orderService.createOrder(user,goods) ;
 		}else {
 			//如果库存不存在则内存标记为true
@@ -43,6 +53,12 @@ public class MiaoshaService {
 	}
 
 
+	/**
+	 * 获取秒杀结果
+	 * @param userId
+	 * @param goodsId
+	 * @return
+	 */
 	public long getMiaoshaResult(Long userId, long goodsId) {
 		MiaoshaOrder order = orderService.getMiaoshaOrderByUserIdGoodsId(userId, goodsId);
 		if(order != null) {//秒杀成功
@@ -57,14 +73,33 @@ public class MiaoshaService {
 		}
 	}
 
+	/**
+	 * 在redis缓存中
+	 * 秒杀标识设置为：秒杀结束
+	 *
+	 * @param goodsId
+	 */
 	private void setGoodsOver(Long goodsId) {
 		redisService.set(MiaoshaKey.isGoodsOver, ""+goodsId, true);
 	}
 
+	/**
+	 * 在redis缓存中
+	 * 查询给定的商品是否秒杀结束
+	 * @param goodsId
+	 * @return
+	 */
 	private boolean getGoodsOver(long goodsId) {
 		return redisService.exists(MiaoshaKey.isGoodsOver, ""+goodsId);
 	}
 
+	/**
+	 * 验证商品的秒杀url(缓存中的path和用户传递的url比较)
+	 * @param user
+	 * @param goodsId
+	 * @param path
+	 * @return
+	 */
 	public boolean checkPath(MiaoshaUser user, long goodsId, String path) {
 		if(user == null || path == null) {
 			return false;
@@ -73,6 +108,12 @@ public class MiaoshaService {
 		return path.equals(pathOld);
 	}
 
+	/**
+	 * 创建秒杀url地址(创建完后，放入redis缓存)
+	 * @param user
+	 * @param goodsId
+	 * @return
+	 */
 	public String createMiaoshaPath(MiaoshaUser user, long goodsId) {
 		if(user == null || goodsId <=0) {
 			return null;
@@ -82,6 +123,12 @@ public class MiaoshaService {
 		return str;
 	}
 
+	/**
+	 *  生成秒杀验证码
+	 * @param user
+	 * @param goodsId
+	 * @return
+	 */
 	public BufferedImage createVerifyCode(MiaoshaUser user, long goodsId) {
 		if(user == null || goodsId <=0) {
 			return null;
@@ -166,6 +213,12 @@ public class MiaoshaService {
 		return image;
 	}
 
+	/**
+	 * 计算公式结果
+	 * 使用scriptEngine
+	 * @param exp
+	 * @return
+	 */
 	private static int calc(String exp) {
 		try {
 			ScriptEngineManager manager = new ScriptEngineManager();
@@ -178,6 +231,13 @@ public class MiaoshaService {
 		}
 	}
 
+	/**
+	 * 校验秒杀验证码
+	 * @param user
+	 * @param goodsId
+	 * @param verifyCode
+	 * @return
+	 */
 	public boolean checkVerifyCode(MiaoshaUser user, long goodsId, int verifyCode) {
 		if(user == null || goodsId <=0) {
 			return false;
@@ -190,9 +250,13 @@ public class MiaoshaService {
 		return true;
 	}
 
+	/**
+	 * 公式操作符
+	 */
 	private static char[] ops = new char[] {'+', '-', '*'};
 	/**
 	 * + - *
+	 * 生成公式
 	 * */
 	private String generateVerifyCode(Random rdm) {
 		int num1 = rdm.nextInt(10);

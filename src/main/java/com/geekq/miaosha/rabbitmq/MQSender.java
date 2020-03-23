@@ -10,6 +10,9 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * 发送者
+ */
 @Service
 public class MQSender {
 
@@ -21,6 +24,10 @@ public class MQSender {
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
 
+	/**
+	 * 发送秒杀消息
+	 * @param mm
+	 */
 	public void sendMiaoshaMessage(MiaoshaMessage mm) {
 		String msg = RedisService.beanToString(mm);
 		log.info("send message:"+msg);

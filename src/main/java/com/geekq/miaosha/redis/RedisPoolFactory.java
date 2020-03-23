@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
+//将redis连接池对象放入spring容器中
 @Service
 public class RedisPoolFactory {
 

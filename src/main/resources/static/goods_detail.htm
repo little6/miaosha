@@ -88,6 +88,7 @@
 </body>
 <script>
 
+    //获取秒杀接口地址url（商品id， 验证码）
 function getMiaoshaPath(){
 	var goodsId = $("#goodsId").val();
 	g_showLoading();
@@ -96,11 +97,13 @@ function getMiaoshaPath(){
 		type:"GET",
 		data:{
 			goodsId:goodsId,
+            //验证码
 			verifyCode:$("#verifyCode").val()
 		},
 		success:function(data){
 			if(data.code == 0){
 				var path = data.data;
+				//获取成功， 开始秒杀
 				doMiaosha(path);
 			}else{
 				layer.msg(data.msg);
@@ -112,6 +115,7 @@ function getMiaoshaPath(){
 	});
 }
 
+//获取秒杀结果
 function getMiaoshaResult(goodsId){
 	g_showLoading();
 	$.ajax({
@@ -126,6 +130,7 @@ function getMiaoshaResult(goodsId){
 				if(result < 0){
 					layer.msg("对不起，秒杀失败");
 				}else if(result == 0){//继续轮询
+                    //轮询查询秒杀结果
 					setTimeout(function(){
 						getMiaoshaResult(goodsId);
 					}, 200);
@@ -148,6 +153,7 @@ function getMiaoshaResult(goodsId){
 	});
 }
 
+//执行秒杀
 function doMiaosha(path){
 	$.ajax({
 		url:"/miaosha/"+path+"/do_miaosha",
@@ -158,6 +164,7 @@ function doMiaosha(path){
 		success:function(data){
 			if(data.code == 0){
 				//window.location.href="/order_detail.htm?orderId="+data.data.id;
+                //秒杀成功，查询秒杀结果
 				getMiaoshaResult($("#goodsId").val());
 			}else{
 				layer.msg(data.msg);
@@ -170,6 +177,7 @@ function doMiaosha(path){
 	
 }
 
+//将获取的数据渲染到页面上
 function render(detail){
 	var miaoshaStatus = detail.miaoshaStatus;
 	var  remainSeconds = detail.remainSeconds;
@@ -189,11 +197,13 @@ function render(detail){
 	countDown();
 }
 
+//页面加载后，立即执行
 $(function(){
 	//countDown();
 	getDetail();
 });
 
+//获取商品id， 发送ajax请求，获取商品详情信息
 function getDetail(){
 	var goodsId = g_getQueryString("goodsId");
 	$.ajax({
@@ -212,6 +222,7 @@ function getDetail(){
 	});
 }
 
+//页面倒计时操作
 function countDown(){
 	var remainSeconds = $("#remainSeconds").val();
 	var timeout;
@@ -229,16 +240,20 @@ function countDown(){
 			clearTimeout(timeout);
 		}
 		$("#miaoshaTip").html("秒杀进行中");
+		//获取验证码图片
 		$("#verifyCodeImg").attr("src", "/miaosha/verifyCode?goodsId="+$("#goodsId").val());
 		$("#verifyCodeImg").show();
+		//验证码输入框
 		$("#verifyCode").show();
 	}else{//秒杀已经结束
 		$("#buyButton").attr("disabled", true);
 		$("#miaoshaTip").html("秒杀已经结束");
+		//秒杀结束，隐藏验证码输入框
 		$("#verifyCodeImg").hide();
 		$("#verifyCode").hide();
 	}
 }
+//获取验证码
 function refreshVerifyCode(){
 	$("#verifyCodeImg").attr("src", "/miaosha/verifyCode?goodsId="+$("#goodsId").val()+"&timestamp="+new Date().getTime());
 }

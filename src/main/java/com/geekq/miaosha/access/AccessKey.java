@@ -2,6 +2,9 @@ package com.geekq.miaosha.access;
 
 import com.geekq.miaosha.redis.BasePrefix;
 
+/**
+ * 防刷限流key
+ */
 public class AccessKey extends BasePrefix {
 
 	private AccessKey( int expireSeconds, String prefix) {

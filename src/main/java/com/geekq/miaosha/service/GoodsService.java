@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+//商品服务
 @Service
 public class GoodsService {
 	
@@ -15,14 +16,17 @@ public class GoodsService {
 	GoodsDao goodsDao;
 
 
+	//商品列表
 	public List<GoodsVo> listGoodsVo(){
 		return goodsDao.listGoodsVo();
 	}
 
+	//根据id，查询商品信息
 	public GoodsVo getGoodsVoByGoodsId(long goodsId) {
 		return goodsDao.getGoodsVoByGoodsId(goodsId);
 	}
 
+	//减库存
 	public boolean reduceStock(GoodsVo goods) {
 		MiaoshaGoods g = new MiaoshaGoods();
 		g.setGoodsId(goods.getId());

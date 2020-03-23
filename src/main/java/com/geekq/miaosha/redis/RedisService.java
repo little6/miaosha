@@ -9,10 +9,12 @@ import redis.clients.jedis.*;
 import java.util.ArrayList;
 import java.util.List;
 
+//redis服务
 @Service
 @Slf4j
 public class RedisService {
-	
+
+	//jedis连接池
 	@Autowired
 	JedisPool jedisPool;
 
@@ -106,9 +108,14 @@ public class RedisService {
         jedisPool.returnResource(jedis);
         return result;
     }
+
 	/**
 	 * 设置对象
-	 * */
+	 * @param prefix
+	 * @param key
+	 * @param value
+	 * @return 是否成功
+	 */
 	public <T> boolean set(KeyPrefix prefix, String key,  T value) {
 		 Jedis jedis = null;
 		 try {
@@ -121,8 +128,10 @@ public class RedisService {
 			 String realKey  = prefix.getPrefix() + key;
 			 int seconds =  prefix.expireSeconds();
 			 if(seconds <= 0) {
+			 	 //永不过期
 				 jedis.set(realKey, str);
 			 }else {
+			 	 //设置过期时间
 				 jedis.setex(realKey, seconds, str);
 			 }
 			 return true;
@@ -192,6 +201,11 @@ public class RedisService {
 		 }
 	}
 
+	/**
+	 * 删除指定的key
+	 * @param key
+	 * @return
+	 */
     public  Long del(String key){
         Jedis jedis = null;
         Long result = null;
@@ -256,7 +270,12 @@ public class RedisService {
 			}
 		}
 	}
-	
+
+	/**
+	 * 序列化方法
+	 * @param value
+	 * @return
+	 */
 	public static <T> String beanToString(T value) {
 		if(value == null) {
 			return null;
@@ -273,6 +292,12 @@ public class RedisService {
 		}
 	}
 
+	/**
+	 * 反序列化
+	 * @param str
+	 * @param clazz
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T stringToBean(String str, Class<T> clazz) {
 		if(str == null || str.length() <= 0 || clazz == null) {
@@ -285,10 +310,15 @@ public class RedisService {
 		}else if(clazz == long.class || clazz == Long.class) {
 			return  (T)Long.valueOf(str);
 		}else {
+			//将json转换成javabean对象
 			return JSON.toJavaObject(JSON.parseObject(str), clazz);
 		}
 	}
 
+	/**
+	 * redis连接归还连接池
+	 * @param jedis
+	 */
 	private void returnToPool(Jedis jedis) {
 		 if(jedis != null) {
 			 jedis.close();

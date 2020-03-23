@@ -61,10 +61,12 @@
 </form>
 </body>
 <script>
+//跳转到注册页面
 function register() {
     window.location.href='/user/do_register';
 }
 
+//登录
 function login(){
 	$("#loginForm").validate({
         submitHandler:function(form){
@@ -73,8 +75,10 @@ function login(){
     });
 }
 function doLogin(){
+    //展示loading
 	g_showLoading();
-	
+
+	//对用户输入的明文进行密码加密
 	var inputPass = $("#password").val();
 	var salt = g_passsword_salt;
 	var str = ""+salt.charAt(0)+salt.charAt(2) + inputPass +salt.charAt(5) + salt.charAt(4);
@@ -91,6 +95,7 @@ function doLogin(){
 	    	layer.closeAll();
 	    	if(data.code == 0){
 	    		layer.msg("成功");
+	    		//登录成功，跳转到商品列表页面
 	    		window.location.href="/goods/to_list";
 	    	}else{
 	    		layer.msg(data.message);

@@ -7,12 +7,16 @@ import org.springframework.context.annotation.Configuration;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * mq的配置类
+ */
 @Configuration
 public class MQConfig {
 
 	/**
 	 * /usr/sbin/rabbitmq-plugins enable rabbitmq_management
 	 * mq页面
+	 * 秒杀队列
 	 */
 	public static final String MIAOSHA_QUEUE = "miaosha.queue";
 
@@ -63,6 +67,8 @@ public class MQConfig {
 	}
 	/**
 	 * Fanout模式 交换机Exchange
+	 *
+	 * 广播模式
 	 * */
 	@Bean
 	public FanoutExchange fanoutExchage(){

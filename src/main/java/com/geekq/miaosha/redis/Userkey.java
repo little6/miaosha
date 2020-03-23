@@ -2,6 +2,7 @@ package com.geekq.miaosha.redis;
 
 public class Userkey extends BasePrefix {
 
+    //私有方法
     private Userkey(String prefix) {
         super( prefix);
     }

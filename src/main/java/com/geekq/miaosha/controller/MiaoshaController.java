@@ -31,6 +31,7 @@ import java.util.List;
 
 import static com.geekq.miaosha.common.enums.ResultStatus.*;
 
+//秒杀controller
 @Controller
 @RequestMapping("/miaosha")
 public class MiaoshaController implements InitializingBean {
@@ -55,12 +56,22 @@ public class MiaoshaController implements InitializingBean {
     @Autowired
     MQSender mqSender;
 
+    /**
+     * 商品是否已经秒杀结束的标识
+     * true：秒杀结束
+     */
     private HashMap<Long, Boolean> localOverMap = new HashMap<Long, Boolean>();
 
     /**
+     * 秒杀功能 (返回json)
      * QPS:1306
      * 5000 * 10
-     * get　post get 幂等　从服务端获取数据　不会产生影响　　post 对服务端产生变化
+     * get　post 的区别？
+     * get是幂等　从服务端获取数据　不会产生影响　
+     * post 不是幂等性对服务端产生变化
+     *
+     *
+     * return： 0 --> 排队中
      */
     @AccessLimit(seconds = 5, maxCount = 5, needLogin = true)
     @RequestMapping(value="/{path}/do_miaosha", method= RequestMethod.POST)
@@ -76,8 +87,9 @@ public class MiaoshaController implements InitializingBean {
         //验证path
         boolean check = miaoshaService.checkPath(user, goodsId, path);
         if (!check) {
+            //非法请求
             result.withError(REQUEST_ILLEGAL.getCode(), REQUEST_ILLEGAL.getMessage());
-            return result;
+                return result;
         }
 //		//使用RateLimiter 限流
 //		RateLimiter rateLimiter = RateLimiter.create(10);
@@ -94,7 +106,7 @@ public class MiaoshaController implements InitializingBean {
             result.withError(REPEATE_MIAOSHA.getCode(), REPEATE_MIAOSHA.getMessage());
             return result;
         }
-        //内存标记，减少redis访问
+        //内存标记，减少redis访问(先查询这个商品是否秒杀结束)
         boolean over = localOverMap.get(goodsId);
         if (over) {
             result.withError(MIAO_SHA_OVER.getCode(), MIAO_SHA_OVER.getMessage());
@@ -107,6 +119,7 @@ public class MiaoshaController implements InitializingBean {
             result.withError(MIAO_SHA_OVER.getCode(), MIAO_SHA_OVER.getMessage());
             return result;
         }
+        //异步发送下单消息到rabbitmq
         MiaoshaMessage mm = new MiaoshaMessage();
         mm.setGoodsId(goodsId);
         mm.setUser(user);
@@ -116,6 +129,7 @@ public class MiaoshaController implements InitializingBean {
 
 
     /**
+     * 查询秒杀结果：
      * orderId：成功
      * -1：秒杀失败
      * 0： 排队中
@@ -136,6 +150,14 @@ public class MiaoshaController implements InitializingBean {
         return result;
     }
 
+    /**
+     * 获取秒杀url地址
+     * @param request
+     * @param user
+     * @param goodsId
+     * @param verifyCode
+     * @return
+     */
     @AccessLimit(seconds = 5, maxCount = 5, needLogin = true)
     @RequestMapping(value = "/path", method = RequestMethod.GET)
     @ResponseBody
@@ -148,16 +170,23 @@ public class MiaoshaController implements InitializingBean {
             result.withError(SESSION_ERROR.getCode(), SESSION_ERROR.getMessage());
             return result;
         }
+        //验证码校验
         boolean check = miaoshaService.checkVerifyCode(user, goodsId, verifyCode);
         if (!check) {
             result.withError(REQUEST_ILLEGAL.getCode(), REQUEST_ILLEGAL.getMessage());
             return result;
         }
+        //创建秒杀url地址
         String path = miaoshaService.createMiaoshaPath(user, goodsId);
         result.setData(path);
         return result;
     }
 
+    /**
+     *
+     * @param response
+     * @return
+     */
     @RequestMapping(value = "/verifyCodeRegister", method = RequestMethod.GET)
     @ResponseBody
     public ResultGeekQ<String> getMiaoshaVerifyCod(HttpServletResponse response
@@ -176,6 +205,14 @@ public class MiaoshaController implements InitializingBean {
             return result;
         }
     }
+
+    /**
+     * 获取秒杀验证码（获取url时，需要输入的验证码）
+     * @param response
+     * @param user
+     * @param goodsId
+     * @return
+     */
     @RequestMapping(value = "/verifyCode", method = RequestMethod.GET)
     @ResponseBody
     public ResultGeekQ<String> getMiaoshaVerifyCod(HttpServletResponse response, MiaoshaUser user,
@@ -198,8 +235,9 @@ public class MiaoshaController implements InitializingBean {
             return result;
         }
     }
+
     /**
-     * 系统初始化
+     * 系统初始化，加载商品信息到redis中
      *
      * @throws Exception
      */

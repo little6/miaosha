@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.util.Date;
 
+//订单信息
 @Setter
 @Getter
 @AllArgsConstructor

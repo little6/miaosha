@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+//秒杀订单信息
 @Setter
 @Getter
 @AllArgsConstructor

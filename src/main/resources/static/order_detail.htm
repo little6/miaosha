@@ -59,6 +59,7 @@
 </body>
 </html>
 <script>
+    //将详情数据渲染到页面上
 function render(detail){
 	var goods = detail.goods;
 	var order = detail.order;
@@ -80,7 +81,9 @@ $(function(){
 	getOrderDetail();
 })
 
+//获取订单详情
 function getOrderDetail(){
+    //获取请求参数
 	var orderId = g_getQueryString("orderId");
 	$.ajax({
 		url:"/order/detail",
@@ -90,6 +93,7 @@ function getOrderDetail(){
 		},
 		success:function(data){
 			if(data.code == 0){
+			    //渲染页面数据
 				render(data.data);
 			}else{
 				layer.msg(data.msg);

@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.util.Date;
 
+//秒杀用户
 @Setter
 @Getter
 @AllArgsConstructor

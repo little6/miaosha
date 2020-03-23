@@ -16,6 +16,9 @@ import javax.servlet.http.HttpServletResponse;
 import static com.geekq.miaosha.common.enums.ResultStatus.CODE_FAIL;
 import static com.geekq.miaosha.common.enums.ResultStatus.RESIGETER_FAIL;
 
+/**
+ * 注册controller
+ */
 @Controller
 @RequestMapping("/user")
 public class RegisterController {
@@ -27,6 +30,7 @@ public class RegisterController {
     @Autowired
     private MiaoshaService miaoshaService ;
 
+    //注册页面
     @RequestMapping("/do_register")
     public String registerIndex(){
         return "register";
@@ -56,6 +60,7 @@ public class RegisterController {
             return result;
 
         }
+        //调用服务完成注册
         boolean registerInfo  = miaoShaUserService.register(response , userName,passWord,salt);
         if(!registerInfo){
            result.withError(RESIGETER_FAIL.getCode(),RESIGETER_FAIL.getMessage());

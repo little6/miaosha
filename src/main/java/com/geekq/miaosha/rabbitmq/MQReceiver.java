@@ -20,6 +20,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
+/**
+ * 消费者
+ */
 @Service
 public class MQReceiver {
 
@@ -39,8 +42,12 @@ public class MQReceiver {
 
 		@Autowired
 		MiaoShaMessageService messageService ;
-		
-		@RabbitListener(queues=MQConfig.MIAOSHA_QUEUE)
+
+	/**
+	 * 监听秒杀消息， 处理秒杀下单操作
+	 * @param message
+	 */
+	@RabbitListener(queues=MQConfig.MIAOSHA_QUEUE)
 		public void receive(String message) {
 			log.info("receive message:"+message);
 			MiaoshaMessage mm  = RedisService.stringToBean(message, MiaoshaMessage.class);
@@ -49,6 +56,7 @@ public class MQReceiver {
 
 			GoodsVo goods = goodsService.getGoodsVoByGoodsId(goodsId);
 	    	int stock = goods.getStockCount();
+	    	//检查是否有库存
 	    	if(stock <= 0) {
 	    		return;
 	    	}

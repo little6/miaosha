@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+//商品
 @Setter
 @Getter
 @AllArgsConstructor

@@ -23,6 +23,9 @@ import java.io.OutputStream;
 import static com.geekq.miaosha.common.enums.ResultStatus.ACCESS_LIMIT_REACHED;
 import static com.geekq.miaosha.common.enums.ResultStatus.SESSION_ERROR;
 
+/**
+ * 防刷限流拦截器
+ */
 @Service
 public class AccessInterceptor  extends HandlerInterceptorAdapter{
 
@@ -34,6 +37,14 @@ public class AccessInterceptor  extends HandlerInterceptorAdapter{
 	@Autowired
 	RedisService redisService;
 
+	/**
+	 * 方法执行前，进行访问次数限制
+	 * @param request
+	 * @param response
+	 * @param handler
+	 * @return
+	 * @throws Exception
+	 */
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
@@ -48,14 +59,18 @@ public class AccessInterceptor  extends HandlerInterceptorAdapter{
 //				return true;
 //			}
 			MiaoshaUser user = getUser(request, response);
+			//将当前用户放入threadLocal中
 			UserContext.setUser(user);
+			//获取方法上的注解
 			AccessLimit accessLimit = hm.getMethodAnnotation(AccessLimit.class);
 			if(accessLimit == null) {
+				//没有限制
 				return true;
 			}
 			int seconds = accessLimit.seconds();
 			int maxCount = accessLimit.maxCount();
 			boolean needLogin = accessLimit.needLogin();
+			//获取请求url
 			String key = request.getRequestURI();
 			if(needLogin) {
 				if(user == null) {
@@ -66,13 +81,17 @@ public class AccessInterceptor  extends HandlerInterceptorAdapter{
 			}else {
 				//do nothing
 			}
+			//动态设置key的有效期
 			AccessKey ak = AccessKey.withExpire(seconds);
 			Integer count = redisService.get(ak, key, Integer.class);
 	    	if(count  == null) {
+	    		//初始化访问次数1
 	    		 redisService.set(ak, key, 1);
 	    	}else if(count < maxCount) {
+	    		//访问次数+1
 	    		 redisService.incr(ak, key);
 	    	}else {
+	    		//超出访问次数
 	    		render(response, ACCESS_LIMIT_REACHED);
 	    		return false;
 	    	}
@@ -83,10 +102,18 @@ public class AccessInterceptor  extends HandlerInterceptorAdapter{
 	@Override
 	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
 		super.afterCompletion(request, response, handler, ex);
+		//从threadlocal中移除当前用户
 		UserContext.removeUser();
 	}
 
+	/**
+	 * 响应错误json数据
+	 * @param response
+	 * @param cm
+	 * @throws Exception
+	 */
 	private void render(HttpServletResponse response, ResultStatus cm)throws Exception {
+		//指定输出的编码格式，防止乱码
 		response.setContentType("application/json;charset=UTF-8");
 		OutputStream out = response.getOutputStream();
 		String str  = JSON.toJSONString(ResultGeekQ.error(cm));
@@ -95,6 +122,12 @@ public class AccessInterceptor  extends HandlerInterceptorAdapter{
 		out.close();
 	}
 
+	/**
+	 * 获取用户信息(从cookie中)
+	 * @param request
+	 * @param response
+	 * @return
+	 */
 	private MiaoshaUser getUser(HttpServletRequest request, HttpServletResponse response) {
 		String paramToken = request.getParameter(MiaoShaUserService.COOKIE_NAME_TOKEN);
 		String cookieToken = getCookieValue(request, MiaoShaUserService.COOKIE_NAME_TOKEN);

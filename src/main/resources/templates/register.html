@@ -14,13 +14,17 @@
 		<link rel="stylesheet" th:href="@{/css/font-awesome.min.css}" />
 <script>
     $(function() {// 初始化内容
+		//注册时验证码
         $("#verifyCodeImg").attr("src", "/miaosha/verifyCodeRegister");
+        //验证码输入框
         $("#verifyCodeImg").show();
     });
+    //刷新验证码，重新获取
     function refreshVerifyCode(){
         $("#verifyCodeImg").attr("src", "/miaosha/verifyCodeRegister");
     };
 
+    //手机号校验
     function checkPhone(phone){
         if(!(/^1[34578]\d{9}$/.test(phone))){
             alert("手机号码有误，请重填");
@@ -28,6 +32,7 @@
         }
     }
 
+    //注册
     function register_go() {
 		var username =$("#username").val();
 	    var inputPass = $("#password").val();
@@ -69,6 +74,7 @@
                 layer.closeAll();
                 if(data.code == 0){
                     layer.msg("成功");
+                    //注册成功，跳转到商品列表页面
                     window.location.href="/goods/to_list";
                 }else{
                     layer.msg(data.message);
